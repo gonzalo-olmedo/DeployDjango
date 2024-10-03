@@ -1,50 +1,48 @@
-version: '3.8'
 
 services:
   web:
     build: .
     command: gunicorn universidad.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - .:/planetsuperheroes
-      - static_volume:/planetsuperheroes/staticfiles
+      - .:/planetsuperheroes  # Mapea tu código al contenedor
+      - static_volume:/planetsuperheroes/staticfiles  # Volume para archivos estáticos
     expose:
-      - 8000
-    env_file: .env
+      - 8000  # Expone el puerto 8000 para otros contenedores
+    env_file: .env  # Archivos de entorno
     networks:
-      - default
+      - default  # Conéctate a la red por defecto
 
   nginx:
-    image: nginx:latest
+    image: nginx:latest  # Imagen de Nginx
     ports:
-      - "80:80"
+      - "80:80"  # Mapea el puerto 80 del contenedor al puerto 80 del host
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - static_volume:/planetsuperheroes/staticfiles
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Mapea tu configuración de Nginx
+      - static_volume:/planetsuperheroes/staticfiles  # Volume para archivos estáticos
     depends_on:
-      - web
+      - web  # Asegúrate de que el servicio web esté en funcionamiento
     networks:
-      - default
+      - default  # Conéctate a la red por defecto
 
   postgres_db:
-    image: postgres:latest
-    container_name: postgres_db
+    image: postgres:latest  # Imagen de PostgreSQL
+    container_name: postgres_db  # Nombre del contenedor
     ports:
-      - "5432:5432"
+      - "5432:5432"  # Mapea el puerto 5432 del contenedor al puerto 5432 del host
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data  # Volume para persistencia de datos
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB}  # Variables de entorno
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
-      - default
+      - default  # Conéctate a la red por defecto
 
 networks:
   default:
-    driver: bridge
+    driver: bridge  # Configura la red por defecto
 
 volumes:
-  static_volume:
-  postgres_data:
-
+  static_volume:  # Volume para archivos estáticos
+  postgres_data:  # Volume para datos de PostgreSQL
 
