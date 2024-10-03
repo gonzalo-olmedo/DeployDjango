@@ -4,7 +4,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 
-
 load_dotenv()
 
 # Ruta base del proyecto
@@ -12,14 +11,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 WSGI_APPLICATION = 'universidad.wsgi.application'
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0e*4)xp%lp!2lc37aujo38n-14a@4wo81qqjsi-!atniye0jd$'
+SECRET_KEY = os.getenv('SECRET_KEY')  # Cambiado para cargar desde .env
 
+# En modo producción, configura DEBUG a False
+DEBUG = os.getenv('DEBUG', 'False') == 'True'  # Permitir configuración desde .env
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']  # Cambia esto en producción
+
+# Configuración de archivos estáticos
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Configuración para archivos estáticos
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Aplicación de usuario personalizada
 AUTH_USER_MODEL = 'MyComicApp.User'
 
+# Configuración de registro
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -39,10 +49,7 @@ LOGGING = {
     },
 }
 
-
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,23 +63,26 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'whitenoise',  # Agrega WhiteNoise
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Agrega WhiteNoise aquí
+    'corsheaders.middleware.CorsMiddleware',  # Asegúrate de que esté aquí
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    # 'rest_framework_simplejwt.authentication.JWTAuthentication',
 ]
+
+# Configuración de CORS
 CORS_ORIGIN_WHITELIST = ['http://localhost:4200']
-CORS_ALLOWED_ORIGINS = ['http://localhost:4200',]
+CORS_ALLOWED_ORIGINS = ['http://localhost:4200']
 CORS_ALLOW_CREDENTIALS = True
+
 ROOT_URLCONF = 'universidad.urls'
 
 TEMPLATES = [
@@ -93,20 +103,10 @@ TEMPLATES = [
 
 # Database
 DATABASES = {
-    'default': {
-        'default': dj_database_url.config(default=os.getenv('DATABASE_URL')),
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST'),
-        'PORT': os.getenv('POSTGRES_PORT'),
-    }
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL')),
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -122,40 +122,30 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# REST Framework settings
 REST_FRAMEWORK = {
- 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES':(
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
-    )
+    ),
 }
 
 SIMPLE_JWT = {
-    'ROTATE_REFRESH_TOKENS':True,
-    'BLACKLIST_AFTER_ROTATION':True,
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=255),
-    'REFRESH_TOKEN_LIFETIME':timedelta(days=1),
-       
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
@@ -163,7 +153,7 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',   
+    'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
 APPEND_SLASH = False
