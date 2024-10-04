@@ -2,7 +2,11 @@ import os
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
+from cloudinary import CloudinaryImage
+from cloudinary_storage.storage import MediaCloudinaryStorage
 import dj_database_url
+
+
 
 load_dotenv()
 
@@ -22,6 +26,13 @@ ALLOWED_HOSTS = ['*']  # Cambia esto en producción
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Configuración de Cloudinary usando CLOUDINARY_URL
+cloudinary.config(
+    url=os.getenv('CLOUDINARY_URL')
+)
+
+# Configuración de archivos de medios usando Cloudinary
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # Configuración para archivos estáticos
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

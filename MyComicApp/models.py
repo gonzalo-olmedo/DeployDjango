@@ -85,7 +85,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     discount = models.IntegerField(blank=True, null=True)
     stock = models.IntegerField(blank=False)
-    image = models.CharField(max_length=255, blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)
     pages = models.IntegerField(blank=True, null=True)
     format = models.CharField(max_length=45, blank=True, null=True)
     weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
