@@ -88,7 +88,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     discount = models.IntegerField(blank=True, null=True)
     stock = models.IntegerField(blank=False)
-    image = CloudinaryField('image', upload_to=generate_public_id, blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)  
     pages = models.IntegerField(blank=True, null=True)
     format = models.CharField(max_length=45, blank=True, null=True)
     weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
@@ -103,6 +103,11 @@ class Product(models.Model):
         
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.image:  # Si hay una imagen
+            public_id = generate_public_id(self, self.image.name)  
+        super().save(*args, **kwargs)
 
 class Order(models.Model):
     id_order = models.AutoField(primary_key=True)
