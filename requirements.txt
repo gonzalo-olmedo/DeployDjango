@@ -1,5 +1,7 @@
 ﻿asgiref==3.8.1
 Brotli==1.1.0
+cloudinary==1.36.0
+django-cloudinary-storage==0.3.0 
 dj-database-url==2.2.0
 Django==4.2
 django-cors-headers==4.3.1
