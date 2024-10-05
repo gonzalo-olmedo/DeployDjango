@@ -61,6 +61,36 @@ class ProductSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Solo se permiten imágenes.")
         return value
 
+    def create(self, validated_data):
+        image = validated_data.pop('image', None)
+        if image:
+            upload_result = cloudinary.uploader.upload(image)
+            validated_data['image'] = upload_result['secure_url']  # Almacena la URL de la imagen
+
+        product = Product.objects.create(**validated_data)
+        return product
+
+    def update(self, instance, validated_data):
+        # Actualizar otros campos del producto
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.price = validated_data.get('price', instance.price)
+        instance.discount = validated_data.get('discount', instance.discount)
+        instance.stock = validated_data.get('stock', instance.stock)
+        instance.pages = validated_data.get('pages', instance.pages)
+        instance.format = validated_data.get('format', instance.format)
+        instance.weight = validated_data.get('weight', instance.weight)
+        instance.isbn = validated_data.get('isbn', instance.isbn)
+        instance.category = validated_data.get('category', instance.category)
+
+        new_image = validated_data.get('image', None)
+        if new_image:
+            upload_result = cloudinary.uploader.upload(new_image)
+            instance.image = upload_result['secure_url']  # Almacena la nueva URL de la imagen
+
+        instance.save()  # Guardar los cambios
+        return instance
+
 # El resto de los serializers permanecen sin cambios
 class LogoutSerializer(serializers.Serializer):
     user = serializers.IntegerField()

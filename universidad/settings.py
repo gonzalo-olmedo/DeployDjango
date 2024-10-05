@@ -1,46 +1,144 @@
 import os
-from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
-from cloudinary import CloudinaryImage
-from cloudinary_storage.storage import MediaCloudinaryStorage
 import dj_database_url
+import cloudinary
+from datetime import timedelta
 
-
-
+# Cargar variables de entorno desde .env
 load_dotenv()
 
 # Ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Claves y Configuraciones
+SECRET_KEY = os.getenv('SECRET_KEY')  # Clave secreta de Django
+
+# Configuración de DEBUG
+DEBUG = os.getenv('DEBUG', 'False') == 'True'  # True para desarrollo, False para producción
+
+ALLOWED_HOSTS = ['*']  # Cambia esto en producción para especificar dominios permitidos
+
+# Aplicaciones instaladas
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'MyComicApp',  # Tu aplicación personalizada
+    'rest_framework',
+    'corsheaders',
+    'drf_yasg',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'whitenoise',  
+    'cloudinary_storage',  # Cloudinary Storage
+    'cloudinary',          # Cloudinary
+]
+
+# Middleware
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS debe estar lo más arriba posible
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise para archivos estáticos
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Configuración de CORS
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4200',    # Frontend en desarrollo
+    'https://tudominio.com',    # Dominios de producción
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# Configuración de URLs
+ROOT_URLCONF = 'universidad.urls'
+
+# Plantillas
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],  # Añade directorios de plantillas si es necesario
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',  # Necesario para algunos paquetes
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+# WSGI
 WSGI_APPLICATION = 'universidad.wsgi.application'
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')  # Cambiado para cargar desde .env
+# Configuración de la base de datos
+DATABASES = {
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL')),
+}
 
-# En modo producción, configura DEBUG a False
-DEBUG = os.getenv('DEBUG', 'False') == 'True'  # Permitir configuración desde .env
+# Validadores de contraseñas
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
-ALLOWED_HOSTS = ['*']  # Cambia esto en producción
+# Internacionalización
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
 
-# Configuración de archivos estáticos
+# Archivos estáticos
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Configuración de Cloudinary usando CLOUDINARY_URL
-cloudinary.config(
-    url=os.getenv('CLOUDINARY_URL')
-)
-
-# Configuración de archivos de medios usando Cloudinary
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-# Configuración para archivos estáticos
+# Configuración de WhiteNoise para archivos estáticos en producción
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Aplicación de usuario personalizada
+# Almacenamiento de medios en Cloudinary
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Configuración de Cloudinary
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    'SECURE': True,            # URLs seguras (HTTPS)
+    'RESOURCE_TYPE': 'auto',   # Permite múltiples tipos de recursos
+}
+
+# Modelo de usuario personalizado (si lo tienes)
 AUTH_USER_MODEL = 'MyComicApp.User'
 
-# Configuración de registro
+# Registro de logs
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -60,102 +158,21 @@ LOGGING = {
     },
 }
 
-# Application definition
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'MyComicApp',
-    'rest_framework',
-    'corsheaders',
-    'drf_yasg',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
-    'whitenoise',  # Agrega WhiteNoise
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Agrega WhiteNoise aquí
-    'corsheaders.middleware.CorsMiddleware',  # Asegúrate de que esté aquí
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-# Configuración de CORS
-CORS_ORIGIN_WHITELIST = ['http://localhost:4200']
-CORS_ALLOWED_ORIGINS = ['http://localhost:4200']
-CORS_ALLOW_CREDENTIALS = True
-
-ROOT_URLCONF = 'universidad.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-# Database
-DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL')),
-}
-
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-# Internationalization
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
-
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# REST Framework settings
+# REST Framework configuración
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.AllowAny',  # Considera cambiar a 'IsAuthenticated' para mayor seguridad
     ),
 }
 
+# Configuración de Simple JWT
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=255),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=255),  # Considera reducir este valor para mayor seguridad
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
@@ -167,4 +184,7 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-APPEND_SLASH = False
+# Otras configuraciones
+APPEND_SLASH = False  # Si no deseas que Django agregue una barra al final de las URLs automáticamente
+
+
