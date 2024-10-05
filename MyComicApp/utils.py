@@ -12,6 +12,6 @@ def generate_public_id(instance, filename):
     unique_id = uuid.uuid4().hex
 
     # Combinar el nombre y el UUID con la ruta deseada
-    public_id = f"home/planetsuperheroes/images/productos/{name}_{unique_id}{ext}"
+    public_id = f"planetsuperheroes/images/productos/{name}_{unique_id}{ext}"
 
     return public_id  # Devuelve el ID público generado
