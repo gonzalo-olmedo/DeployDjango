@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import dj_database_url
 import cloudinary
 from datetime import timedelta
+from decouple import config
 
 # Cargar variables de entorno desde .env
 load_dotenv()
