@@ -42,6 +42,7 @@ admin.site.register(Category, CategoryAdmin)
 # Product Admin
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('id_product', 'name', 'price', 'stock', 'image_tag')
+    fields = ('name', 'description', 'price', 'discount', 'stock', 'image', 'pages', 'format', 'weight', 'isbn', 'category', 'calification')
 
     def image_tag(self, obj):
         if obj.image:
