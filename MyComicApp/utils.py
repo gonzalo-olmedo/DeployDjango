@@ -3,7 +3,6 @@ import os
 import uuid
 
 def generate_public_id(instance, filename):
-
     # Obtener el nombre base y la extensión
     name, ext = os.path.splitext(filename)
     
@@ -13,7 +12,7 @@ def generate_public_id(instance, filename):
     # Generar un UUID para asegurar unicidad
     unique_id = uuid.uuid4().hex
     
-    # Combinar el nombre y el UUID
-    public_id = f"{name}_{unique_id}"
+    # Combinar el nombre y el UUID, agregando la extensión original
+    public_id = f"planetsuperheroes/images/productos/{name}_{unique_id}{ext}"  # Añadir la ruta de la carpeta deseada
     
     return public_id
