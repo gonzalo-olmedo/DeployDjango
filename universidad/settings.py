@@ -3,6 +3,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 from datetime import timedelta
 from decouple import config
 
@@ -113,6 +115,11 @@ USE_TZ = True
 # Archivos estáticos
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Archivos de medios
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
 
 # Configuración de WhiteNoise para archivos estáticos en producción
 if not DEBUG:

@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.models import Group 
 import cloudinary
 from cloudinary.models import CloudinaryField
+from .utils import generate_public_id 
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, role=None, **extra_fields):
@@ -87,7 +88,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     discount = models.IntegerField(blank=True, null=True)
     stock = models.IntegerField(blank=False)
-    image = CloudinaryField('image', blank=True, null=True) 
+    image = CloudinaryField('image', upload_to=generate_public_id, blank=True, null=True)
     pages = models.IntegerField(blank=True, null=True)
     format = models.CharField(max_length=45, blank=True, null=True)
     weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
