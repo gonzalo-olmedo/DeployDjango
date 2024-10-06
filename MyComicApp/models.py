@@ -89,23 +89,42 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     discount = models.IntegerField(blank=True, null=True)
     stock = models.IntegerField(blank=False)
-    image = CloudinaryField('image', blank=True, null=True, upload_to=generate_public_id)  # Usar la función para la ruta
+    image = CloudinaryField('image', blank=True, null=True)  
     pages = models.IntegerField(blank=True, null=True)
     format = models.CharField(max_length=45, blank=True, null=True)
     weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     isbn = models.CharField(max_length=45, blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    
+
     calification = models.DecimalField(
-        max_digits=3,
+        max_digits=4,
         decimal_places=1,
         blank=True,
         null=True,
         validators=[
-            MinValueValidator(0.0),
-            MaxValueValidator(5.0)
+            MinValueValidator(Decimal('0.0')),
+            MaxValueValidator(Decimal('5.0'))
         ]
     )
+
+    class Meta: 
+        db_table = 'products'
+        verbose_name = 'Product'
+        verbose_name_plural = 'Products'
+        
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            # Generar el public_id basado en el nombre del archivo de la imagen
+            public_id = generate_public_id(self, self.image.name)
+
+            # Actualizar el nombre del campo de imagen
+            self.image.name = public_id  # Asignar el nuevo nombre a la imagen
+
+        super().save(*args, **kwargs)
+
 
 
 class Order(models.Model):
