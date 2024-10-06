@@ -81,6 +81,7 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.format = validated_data.get('format', instance.format)
         instance.weight = validated_data.get('weight', instance.weight)
         instance.isbn = validated_data.get('isbn', instance.isbn)
+        
         instance.category = validated_data.get('category', instance.category)
 
         new_image = validated_data.get('image', None)
