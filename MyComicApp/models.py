@@ -117,9 +117,15 @@ class Product(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if self.image: 
-            public_id = generate_public_id(self, self.image.name)  
+        if self.image:
+        # Generar el public_id basado en el nombre del archivo de la imagen
+            public_id = generate_public_id(self, self.image.name)
+
+        # Actualizar el nombre del campo de imagen
+            self.image.name = public_id
+
         super().save(*args, **kwargs)
+
 
 class Order(models.Model):
     id_order = models.AutoField(primary_key=True)
