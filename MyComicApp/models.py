@@ -5,7 +5,8 @@ from django.contrib.auth.models import Group
 import cloudinary
 from cloudinary.models import CloudinaryField
 from django.core.validators import MinValueValidator, MaxValueValidator
-from .utils import generate_public_id 
+from decimal import Decimal
+from .utils import generate_public_id
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, role=None, **extra_fields):
@@ -38,7 +39,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    
     is_superuser = models.BooleanField(default=False)
     role = models.ForeignKey('Role', on_delete=models.SET_NULL, null=True, default=1, related_name='users')
 
@@ -89,42 +89,23 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     discount = models.IntegerField(blank=True, null=True)
     stock = models.IntegerField(blank=False)
-    image = CloudinaryField('image', blank=True, null=True)  
+    image = CloudinaryField('image', blank=True, null=True, upload_to=generate_public_id)  # Usar la función para la ruta
     pages = models.IntegerField(blank=True, null=True)
     format = models.CharField(max_length=45, blank=True, null=True)
     weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     isbn = models.CharField(max_length=45, blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     
-    # Calificación como DecimalField para permitir decimales
     calification = models.DecimalField(
-        max_digits=3,  # Permite hasta 5.0 (2 dígitos antes del punto)
-        decimal_places=1,  # Permite un decimal
+        max_digits=3,
+        decimal_places=1,
         blank=True,
         null=True,
         validators=[
-            MinValueValidator(0.0),  # Mínimo 0.0
-            MaxValueValidator(5.0)   # Máximo 5.0
+            MinValueValidator(0.0),
+            MaxValueValidator(5.0)
         ]
     )
-
-    class Meta: 
-        db_table = 'products'
-        verbose_name = 'Product'
-        verbose_name_plural = 'Products'
-        
-    def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if self.image:
-        # Generar el public_id basado en el nombre del archivo de la imagen
-            public_id = generate_public_id(self, self.image.name)
-
-        # Actualizar el nombre del campo de imagen
-            self.image.name = public_id
-
-        super().save(*args, **kwargs)
 
 
 class Order(models.Model):
