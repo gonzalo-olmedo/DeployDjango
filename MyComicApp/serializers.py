@@ -5,6 +5,7 @@ from .models import Role, User, Product, Category, Order, OrderItem
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from decimal import Decimal
 from django.utils import timezone
+from .utils import generate_public_id  # Asegúrate de que la ruta es correcta
 import cloudinary
 import cloudinary.uploader
 
@@ -56,19 +57,21 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-    def validate_image(self, value):
-        if value:
-            if value.size > 5 * 1024 * 1024:  # 5MB
-                raise serializers.ValidationError("La imagen es demasiado grande (máximo 5MB).")
-            if not value.content_type.startswith('image/'):
-                raise serializers.ValidationError("Solo se permiten imágenes.")
-        return value
-
     def create(self, validated_data):
         image = validated_data.pop('image', None)
         if image:
-            upload_result = cloudinary.uploader.upload(image)
-            validated_data['image'] = upload_result['secure_url']  # Almacena la URL de la imagen
+            # Generar un public_id basado en el nombre del archivo
+            public_id = generate_public_id(None, image.name)
+
+            # Comprobar si ya existe una imagen con ese public_id
+            try:
+                cloudinary.uploader.destroy(public_id)  # Intenta eliminar la imagen existente
+            except cloudinary.exceptions.NotFound:
+                pass  # Ignora si la imagen no existe
+
+            # Subir la nueva imagen
+            upload_result = cloudinary.uploader.upload(image, public_id=public_id)
+            validated_data['image'] = upload_result['secure_url']  # Guarda la URL
 
         product = Product.objects.create(**validated_data)
         return product
@@ -84,16 +87,27 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.format = validated_data.get('format', instance.format)
         instance.weight = validated_data.get('weight', instance.weight)
         instance.isbn = validated_data.get('isbn', instance.isbn)
-
         instance.category = validated_data.get('category', instance.category)
 
         new_image = validated_data.get('image', None)
         if new_image:
-            upload_result = cloudinary.uploader.upload(new_image)
-            instance.image = upload_result['secure_url']  # Almacena la nueva URL de la imagen
+            public_id = generate_public_id(None, new_image.name)
 
-        instance.save()  # Guardar los cambios
+            if instance.image: 
+                # Extraer el public_id del URL actual
+                old_public_id = instance.image.split('/')[-1].split('.')[0]  # Suponiendo que la URL está en el formato estándar de Cloudinary
+                try:
+                    cloudinary.uploader.destroy(old_public_id)  # Eliminar la imagen antigua de Cloudinary
+                except cloudinary.exceptions.NotFound:
+                    pass  # Ignora si la imagen no existe
+
+            # Subir la nueva imagen
+            upload_result = cloudinary.uploader.upload(new_image, public_id=public_id)
+            instance.image = upload_result['secure_url']  # Guarda la nueva URL
+
+        instance.save()  # Guarda los cambios
         return instance
+
 
 # El resto de los serializers permanecen sin cambios
 class LogoutSerializer(serializers.Serializer):
