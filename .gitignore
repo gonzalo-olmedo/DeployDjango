@@ -1,4 +1,5 @@
 entorno/
 env32/
+.env
 
 __pycache__/
