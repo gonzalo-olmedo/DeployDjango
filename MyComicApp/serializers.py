@@ -5,6 +5,9 @@ from .models import Role, User, Product, Category, Order, OrderItem
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from decimal import Decimal
 from django.utils import timezone
+import cloudinary
+import cloudinary.uploader
+
 
 # 1. User Serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -81,7 +84,7 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.format = validated_data.get('format', instance.format)
         instance.weight = validated_data.get('weight', instance.weight)
         instance.isbn = validated_data.get('isbn', instance.isbn)
-        
+
         instance.category = validated_data.get('category', instance.category)
 
         new_image = validated_data.get('image', None)
