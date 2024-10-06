@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.models import Group 
 import cloudinary
 from cloudinary.models import CloudinaryField
+from django.core.validators import MinValueValidator, MaxValueValidator
 from .utils import generate_public_id 
 
 class UserManager(BaseUserManager):
@@ -94,8 +95,19 @@ class Product(models.Model):
     weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     isbn = models.CharField(max_length=45, blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    calification = models.IntegerField(blank=True, null=True)
     
+    # Calificación como DecimalField para permitir decimales
+    calification = models.DecimalField(
+        max_digits=3,  # Permite hasta 5.0 (2 dígitos antes del punto)
+        decimal_places=1,  # Permite un decimal
+        blank=True,
+        null=True,
+        validators=[
+            MinValueValidator(0.0),  # Mínimo 0.0
+            MaxValueValidator(5.0)   # Máximo 5.0
+        ]
+    )
+
     class Meta: 
         db_table = 'products'
         verbose_name = 'Product'
@@ -105,7 +117,7 @@ class Product(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if self.image:  # Si hay una imagen
+        if self.image: 
             public_id = generate_public_id(self, self.image.name)  
         super().save(*args, **kwargs)
 
