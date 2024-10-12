@@ -117,14 +117,17 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if self.image:
-            # Generar el public_id basado en el nombre del archivo de la imagen
             public_id = generate_public_id(self, self.image.name)
 
-            # Usar el método de Cloudinary para subir la imagen
-            upload_result = cloudinary.uploader.upload(self.image, public_id=public_id)
+            try:
+                # Subir la imagen a Cloudinary
+                upload_result = cloudinary.uploader.upload(self.image, public_id=public_id)
 
-            # Asignar la URL de la imagen a self.image
-            self.image = upload_result['secure_url']  # O usar 'url' si prefieres la no segura
+                # Asignar la URL de la imagen a self.image
+                self.image = upload_result['secure_url']
+            except Exception as e:
+                print(f"Error al subir la imagen a Cloudinary: {e}")  # Esto te ayudará a ver qué está fallando
+                raise  # Lanza el error nuevamente después de imprimirlo
 
         super().save(*args, **kwargs)
 
