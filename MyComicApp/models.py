@@ -115,13 +115,13 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
+    ddef save(self, *args, **kwargs):
         if self.image:
             # Generar el public_id basado en el nombre del archivo de la imagen
             public_id = generate_public_id(self, self.image.name)
 
-            # Actualizar el nombre del campo de imagen
-            self.image.name = public_id  # Asignar el nuevo nombre a la imagen
+            # Cambiar el public_id del CloudinaryField para que use la carpeta específica
+            self.image = upload(self.image.file, public_id=public_id)
 
         super().save(*args, **kwargs)
 
