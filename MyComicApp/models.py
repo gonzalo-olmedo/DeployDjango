@@ -125,7 +125,7 @@ class Product(models.Model):
                 upload_result = cloudinary.uploader.upload(
                     self.image,
                     public_id=public_id,
-                    upload_preset='ml_default'  # Cambia esto si usas otro preset
+              
                 )
 
                 # Asignar la URL de la imagen a self.image
