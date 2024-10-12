@@ -115,7 +115,7 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-    ddef save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
         if self.image:
             # Generar el public_id basado en el nombre del archivo de la imagen
             public_id = generate_public_id(self, self.image.name)
