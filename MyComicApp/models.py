@@ -117,6 +117,7 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if self.image:
+            # Puedes especificar un path personalizado aquí si lo deseas
             public_id = generate_public_id(self, self.image.name)
 
             try:
