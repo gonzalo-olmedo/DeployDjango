@@ -117,22 +117,20 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if self.image:
-            # Generar el public_id con el folder deseado
             public_id = generate_public_id(self, self.image.name)
-
             try:
-                # Subir la imagen a Cloudinary con el upload preset
+                # Subir la imagen a Cloudinary con la carpeta especificada
                 upload_result = cloudinary.uploader.upload(
                     self.image,
                     public_id=public_id,
-              
+                    folder='planetsuperheroes/images/productos',  # Especifica la carpeta
+                    use_asset_folder_as_public_id_prefix=True  # Sincroniza la carpeta y el public_id
                 )
-
                 # Asignar la URL de la imagen a self.image
                 self.image = upload_result['secure_url']
             except Exception as e:
-                print(f"Error al subir la imagen a Cloudinary: {e}")  
-                raise  # Lanza el error nuevamente después de imprimirlo
+                print(f"Error al subir la imagen a Cloudinary: {e}")  # Para debugging
+                raise  # Lanza el error nuevamente
 
         super().save(*args, **kwargs)
 
