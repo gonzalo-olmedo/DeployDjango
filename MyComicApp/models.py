@@ -121,10 +121,10 @@ class Product(models.Model):
             public_id = generate_public_id(self, self.image.name)
 
             # Usar el método de Cloudinary para subir la imagen
-            upload_result = cloudinary.uploader.upload(self.image.file, public_id=public_id)
+            upload_result = cloudinary.uploader.upload(self.image, public_id=public_id)
 
             # Asignar la URL de la imagen a self.image
-            self.image = upload_result['url']  # O usar 'url' si prefieres la no segura
+            self.image = upload_result['secure_url']  # O usar 'url' si prefieres la no segura
 
         super().save(*args, **kwargs)
 
